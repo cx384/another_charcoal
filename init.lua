@@ -7,12 +7,12 @@ local function add_tool(name, func)
 end
 
 minetest.register_on_dignode(function(_, oldnode, digger)
-	if digger == nil then
+	if not digger
+	or oldnode.name == "air" then
 		return
 	end
 	local func = another_charcoal[digger:get_wielded_item():get_name()]
-	if func
-	and oldnode.name ~= "air" then
+	if func then
 		func(digger, oldnode)
 	end
 end)
@@ -32,22 +32,22 @@ minetest.register_tool("another_charcoal:steel_splitting_axe", {
 
 add_tool("another_charcoal:steel_splitting_axe", function(digger, node)
 	local nam = node.name
-	local items = minetest.get_node_drops(nam)
+	if minetest.get_item_group(nam, "tree") == 0 then
+		return
+	end
+	--local items = minetest.get_node_drops(nam)
 	local inv = digger:get_inventory()
 	local drops = minetest.get_node_drops(nam)
-	if node.group == tree then do
-		inv:add_item("main", "another_charcoal:split_wood 3")
-		local namn = node.name
-		local drops = minetest.get_node_drops(namn)
-			for _,item in ipairs(drops) do
-				inv:remove_item("main", item)
-			end
-		end
+	inv:add_item("main", "another_charcoal:split_wood 3")
+	--local namn = node.name
+	--local drops = minetest.get_node_drops(namn)
+	for _,item in ipairs(drops) do
+		inv:remove_item("main", item)
 	end
 end)
 
 
---craftitem
+--craftitems
 
 minetest.register_craftitem("another_charcoal:charcoal_lump", {
 	description = "Charcoal Lump",
@@ -65,7 +65,8 @@ minetest.register_craftitem("another_charcoal:ash", {
 	inventory_image = "another_charcoal_ash.png",
 })
 
---node
+
+--nodes
 
 minetest.register_node("another_charcoal:burning_wood_pile", {
 	description = "Burning Wood Pile",
@@ -263,10 +264,11 @@ minetest.register_craft({
 minetest.register_abm({
 	nodenames = {"another_charcoal:wood_pile"},
 	neighbors = {"air"},
-	interval = 100.0,
+	interval = 100,
 	chance = 3,
-	action = function(pos, node, active_object_count, active_object_count_wider)
-		minetest.set_node(pos, {name = "another_charcoal:air_dry_wood_pile"})
+	action = function(pos, node)
+		node.name = "another_charcoal:air_dry_wood_pile"
+		minetest.set_node(pos, node)
 	end,
 })
 
@@ -274,10 +276,11 @@ minetest.register_abm({
 minetest.register_abm({
 	nodenames = {"another_charcoal:air_dry_wood_pile"},
 	neighbors = {"another_charcoal:burning_wood_pile", "fire:basic_flame","default:torch",  "default:lava_source", 		"default:lava_flowing"},
-	interval = 2.0,
+	interval = 2,
 	chance = 1,
-	action = function(pos, node, active_object_count, active_object_count_wider)
-		minetest.set_node(pos, {name = "another_charcoal:burning_wood_pile"})
+	action = function(pos, node)
+		node.name = "another_charcoal:burning_wood_pile"
+		minetest.set_node(pos, node)
 	end,
 })
 
@@ -285,28 +288,30 @@ minetest.register_abm({
 minetest.register_abm({
 	nodenames = {"another_charcoal:burning_wood_pile"},
 	neighbors = {"air"},
-	interval = 10.0,
+	interval = 10,
 	chance = 1,
-	action = function(pos, node, active_object_count, active_object_count_wider)
-		minetest.set_node(pos, {name = "another_charcoal:ash_pile"})
+	action = function(pos, node)
+		node.name = "another_charcoal:ash_pile"
+		minetest.set_node(pos, node)
 	end,
 })
 
 minetest.register_abm({
 	nodenames = {"another_charcoal:burning_wood_pile"},
-	interval = 100.0,
+	interval = 100,
 	chance = 1,
-	action = function(pos, node, active_object_count, active_object_count_wider)
-		minetest.set_node(pos, {name = "another_charcoal:scorched_wood_pile"})
+	action = function(pos, node)
+		node.name = "another_charcoal:scorched_wood_pile"
+		minetest.set_node(pos, node)
 	end,
 })
 
 minetest.register_abm({
 	nodenames = {"another_charcoal:ashblock"},
-	interval = 60.0,
-	chance = 30,
 	neighbors = {"default:water_source", "default:water_flowing"},
-	action = function(pos, node, active_object_count, active_object_count_wider)
+	interval = 60,
+	chance = 30,
+	action = function(pos)
 		minetest.set_node(pos, {name = "default:dirt"})
 	end,
 })
