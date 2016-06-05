@@ -73,6 +73,7 @@ minetest.register_node("another_charcoal:burning_wood_pile", {
 	tiles = {"another_charcoal_wood_pile2.png^another_charcoal_air_dry.png^another_charcoal_burning_wood.png", 			"another_charcoal_wood_pile2.png^another_charcoal_air_dry.png^another_charcoal_burning_wood.png", 			"another_charcoal_wood_pile1.png^another_charcoal_air_dry.png^another_charcoal_burning_wood.png",
 		"another_charcoal_wood_pile1.png^another_charcoal_air_dry.png^another_charcoal_burning_wood.png", 			"another_charcoal_wood_pile.png^another_charcoal_air_dry.png^another_charcoal_burning_wood.png", 			"another_charcoal_wood_pile.png^another_charcoal_air_dry.png^another_charcoal_burning_wood.png"},
 	drop = "another_charcoal:air_dry_wood_pile",
+	paramtype = "none",
 	paramtype2 = "facedir",
 	legacy_facedir_simple = true,
 	is_ground_content = false,
@@ -298,10 +299,38 @@ minetest.register_abm({
 
 minetest.register_abm({
 	nodenames = {"another_charcoal:burning_wood_pile"},
-	interval = 100,
+	interval = 10,
 	chance = 1,
 	action = function(pos, node)
-		node.name = "another_charcoal:scorched_wood_pile"
+		print(node.param1)
+		if not node.param1 then
+			node.param1 = 0
+		end
+		if node.param1 < 10 then
+			node.param1 = node.param1 + 1
+			minetest.add_particlespawner({
+				amount = 6, 
+				time = 10,
+				minpos = vector.add(pos,
+						{x=-0.3,y=0,z=-0.3}), 
+				maxpos = vector.add(pos,
+						{x=0.3,y=0,z=0.3}),
+				minvel = {x=0,y=0.8,z=0}, 
+				maxvel = {x=0,y=1.2,z=0},
+				minacc = {x=0,y=0,z=0},
+				maxacc = {x=0,y=0,z=0},
+				minexptime = 2,
+				maxexptime = 7,
+				minsize = 2,
+				maxsize = 5,
+				collisiondetection = false,
+				vertical = true,
+				texture = "another_charcoal_smoke.png", 
+				playername = "",
+			})
+		else
+			node.name = "another_charcoal:scorched_wood_pile"
+		end
 		minetest.set_node(pos, node)
 	end,
 })
