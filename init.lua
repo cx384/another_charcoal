@@ -79,7 +79,43 @@ minetest.register_node("another_charcoal:burning_wood_pile", {
 	is_ground_content = false,
 	groups = {choppy = 2, oddly_breakable_by_hand = 1, flammable = 2, not_in_creative_inventory = 1},
 	sounds = default.node_sound_wood_defaults(),
-	on_place = minetest.rotate_node
+	on_place = minetest.rotate_node,
+	on_timer = function(pos)
+		local meta = minetest.get_meta(pos)
+		local i = meta:get_int("burntime")
+		minetest.chat_send_all(tostring(i))
+		if not i then
+			meta:set_int("burntime", 0)
+			minetest.get_node_timer(pos):set(10, 0)
+		elseif i < 10 then
+			meta:set_int("burntime", i + 1)
+			minetest.add_particlespawner({
+				amount = 6, 
+				time = 10,
+				minpos = vector.add(pos,
+						{x=-0.3,y=0,z=-0.3}), 
+				maxpos = vector.add(pos,
+						{x=0.3,y=0,z=0.3}),
+				minvel = {x=0,y=0.8,z=0}, 
+				maxvel = {x=0,y=1.2,z=0},
+				minacc = {x=0,y=0,z=0},
+				maxacc = {x=0,y=0,z=0},
+				minexptime = 2,
+				maxexptime = 7,
+				minsize = 2,
+				maxsize = 5,
+				collisiondetection = false,
+				vertical = true,
+				texture = "another_charcoal_smoke.png", 
+				playername = "",
+			})
+			minetest.get_node_timer(pos):set(10, 0)
+		else
+			local node = minetest.get_node(pos)
+			node.name = "another_charcoal:scorched_wood_pile"
+			minetest.set_node(pos, node)
+		end
+	end,
 })
 
 minetest.register_node("another_charcoal:air_dry_wood_pile", {
@@ -282,6 +318,7 @@ minetest.register_abm({
 	action = function(pos, node)
 		node.name = "another_charcoal:burning_wood_pile"
 		minetest.set_node(pos, node)
+		minetest.get_node_timer(pos):start(10)
 	end,
 })
 
@@ -297,43 +334,6 @@ minetest.register_abm({
 	end,
 })
 
-minetest.register_abm({
-	nodenames = {"another_charcoal:burning_wood_pile"},
-	interval = 10,
-	chance = 1,
-	action = function(pos, node)
-		print(node.param1)
-		if not node.param1 then
-			node.param1 = 0
-		end
-		if node.param1 < 10 then
-			node.param1 = node.param1 + 1
-			minetest.add_particlespawner({
-				amount = 6, 
-				time = 10,
-				minpos = vector.add(pos,
-						{x=-0.3,y=0,z=-0.3}), 
-				maxpos = vector.add(pos,
-						{x=0.3,y=0,z=0.3}),
-				minvel = {x=0,y=0.8,z=0}, 
-				maxvel = {x=0,y=1.2,z=0},
-				minacc = {x=0,y=0,z=0},
-				maxacc = {x=0,y=0,z=0},
-				minexptime = 2,
-				maxexptime = 7,
-				minsize = 2,
-				maxsize = 5,
-				collisiondetection = false,
-				vertical = true,
-				texture = "another_charcoal_smoke.png", 
-				playername = "",
-			})
-		else
-			node.name = "another_charcoal:scorched_wood_pile"
-		end
-		minetest.set_node(pos, node)
-	end,
-})
 
 minetest.register_abm({
 	nodenames = {"another_charcoal:ashblock"},
