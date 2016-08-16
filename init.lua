@@ -83,7 +83,7 @@ minetest.register_node("another_charcoal:burning_wood_pile", {
 	on_timer = function(pos)
 		local meta = minetest.get_meta(pos)
 		local i = meta:get_int("burntime")
-		minetest.chat_send_all(tostring(i))
+--		minetest.chat_send_all(tostring(i))
 		if not i then
 			meta:set_int("burntime", 0)
 			minetest.get_node_timer(pos):set(10, 0)
